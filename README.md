@@ -1,2 +1,2 @@
 # autoZalo
-automate sending message via Zalo
+automate sending messages via Zalo
