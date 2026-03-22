@@ -47,8 +47,10 @@ def get_info(recordID, data):
 def get_message(name, gender, removalDateStrVN, removalDate, Dx):
     if Dx == 'JJ':
         message = f"Xin chào {name}, xin mời {gender} đến phòng 121 nhà B2 vào {removalDateStrVN}, {removalDate} để được kiểm tra lại và xem xét rút sonde JJ."
-    if Dx == 'TLT':
+    elif Dx == 'TLT':
         message = f"Xin chào {name}, xin mời {gender} đến phòng khám số 10, Trung tâm Kĩ thuật cao và Tiêu hóa vào {removalDateStrVN}, {removalDate} để được kiểm tra lại tình trạng sau phẫu thuật."
+    elif  Dx == 'Other':
+        message = f"Xin chào {name}, xin mời {gender} đến phòng 121 nhà B2 vào {removalDateStrVN}, {removalDate} để được khám lại và đánh giá sau quá trình điều trị."
     return message
 
 def translator (englishDate: str):
@@ -71,11 +73,13 @@ def translator (englishDate: str):
         vietnameseDate = 'Chủ nhật'
     return vietnameseDate
 
-def run(playwright: Playwright, recordIDs:list) -> None:
+def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
     browser = playwright.chromium.launch(headless=False)
     context = browser.new_context()
     page = context.new_page()
-
+    
+    data = pd.read_excel(filePath, engine=None)
+    recordIDs = [recordID for recordID in data['RecordID']]
 
     # First, load the Zalo chat page. Wait for the user to login by QR code. If not logged in, move to google.com
     try:
@@ -85,6 +89,7 @@ def run(playwright: Playwright, recordIDs:list) -> None:
         page.locator(".fa.fa-outline-add-new-contact-2").wait_for(state="visible", timeout=200000)
         print ('Login successfully')
 
+        notes = []
         # Loop through all the record IDs
         for recordID in recordIDs:
             name, gender, phoneNumber, opDate, removalDate, removalDateStr, Dx = get_info(recordID, data)
@@ -98,40 +103,56 @@ def run(playwright: Playwright, recordIDs:list) -> None:
             if validPhoneNumber:
                 removalDateStrVN = translator(removalDateStr)
                 message = get_message(name, gender, removalDateStrVN, removalDate, Dx)
-
-                page.get_by_title("Thêm bạn").click()
+                print ('about to click Thêm bạn')
+                page.locator(".fa.fa-outline-add-new-contact-2").wait_for(state="visible", timeout=3000)     
+                page.locator(".fa.fa-outline-add-new-contact-2").click()
                 page.get_by_role("textbox", name="Vui lòng điền số điện thoại").click()
                 page.get_by_role("textbox", name="Vui lòng điền số điện thoại").fill(phoneNumber)
                 page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").click()
                 
                 try:
-                    # page.pause()
-                    page.get_by_text("Nhắn tin", exact=True).wait_for(state="visible", timeout=5000)
-                    page.get_by_text("Nhắn tin", exact=True).click()
-                    print ('Clicked on Chat box')
-                    page.locator("#input_line_0").fill(message)
-                    # Pauses for 5 seconds (5000 milliseconds)
-                    page.wait_for_timeout(5000)
+                    errorFlag=False
+                    try:
+                        page.get_by_text("Nhắn tin", exact=True).wait_for(state="visible", timeout=3000)
+                        page.get_by_text("Nhắn tin", exact=True).click()
+                    except:
+                        try:
+                            page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).first.wait_for(state="visible", timeout=3000)
+                            page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).first.click()
+                        except:
+                            try:
+                                page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).nth(1).wait_for(state="visible", timeout=3000)
+                                page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).nth(1).click()
+                            except:
+                                print (f'{recordID} không dùng Zalo')
+                                notes.append (f'{recordID} không dùng Zalo')
+                                errorFlag=True
+                                page.get_by_text("Hủy", exact=True).click()
+                                pass
+                    if not errorFlag:
+                        print (f'Clicked on Chat box of {recordID}')
+                        notes.append ('Đã gửi tin nhắn')
+                        page.locator("#input_line_0").click()
+                        page.keyboard.press("Control+A")
+                        page.keyboard.press("Backspace")
+                        page.locator("#input_line_0").fill(message)
+                        # Pauses for 5 seconds (5000 milliseconds)
+                        page.wait_for_timeout(5000)
                 except:
-                    print (f'{recordID} không dùng Zalo')
-                    page.get_by_text("Hủy", exact=True).click()
                     pass
-
-                
 
             if not validPhoneNumber:
                 print (f'{recordID} bị sai số điện thoại')
+                notes.append (f'{recordID} bị sai số điện thoại')
 
-        # context.close()
-        # browser.close()
+        data['notes'] = notes
+        data.to_excel(exportPath, index = False)
     except:
-        page.goto("https://google.com")
         page.wait_for_timeout(500000)
 
 
-
 with sync_playwright() as playwright:
-    filePath = r"D:\BS_LeDuyBinh\automation\zaloAuto\JJsonde_reminder.xlsx"
-    data = pd.read_excel(filePath, engine=None)
-    recordIDs = [recordID for recordID in data['RecordID']]
-    run(playwright, recordIDs)
+    root = r"D:\BS_LeDuyBinh\automation\zaloAuto\\"
+    filePath = root + "JJsonde_reminder.xlsx"
+    exportPath = root + "reminder_messages.xlsx"
+    run(playwright, filePath, exportPath)
