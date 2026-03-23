@@ -20,10 +20,14 @@ def get_info(recordID, data):
     if gender == 'Female':
         genderVN = 'chị'
         
-    phoneNumber = data['PhoneNumber'][data['RecordID']==int(recordID)].to_list()[0]
-    if str(phoneNumber)[0] != '0':
-        phoneNumber = '0'+ str(phoneNumber)
-    
+    phoneNumber_1 = str(data['PhoneNumber_1'][data['RecordID']==int(recordID)].to_list()[0])
+    phoneNumber_2 = str(data['PhoneNumber_2'][data['RecordID']==int(recordID)].to_list()[0])
+
+    if str(phoneNumber_1)[0] != '0':
+        phoneNumber_1 = '0'+ str(phoneNumber_1)
+    if str(phoneNumber_2)[0] != '0':
+        phoneNumber_2 = '0'+ str(phoneNumber_2)
+        
     opDate = data['OperationDate'][data['RecordID']==int(recordID)].to_list()[0]
         
     opDate_object = datetime.strptime(opDate, '%d/%m/%Y')    
@@ -42,7 +46,7 @@ def get_info(recordID, data):
 
     Dx = data['Dx'][data['RecordID']==int(recordID)].to_list()[0]
 
-    return name, genderVN, phoneNumber, opDate, removalDate.strftime("%d/%m/%Y"), removalDate.strftime("%A"), Dx
+    return name, genderVN, phoneNumber_1, phoneNumber_2, opDate, removalDate.strftime("%d/%m/%Y"), removalDate.strftime("%A"), Dx
 
 def get_message(name, gender, removalDateStrVN, removalDate, Dx):
     if Dx == 'JJ':
@@ -81,6 +85,7 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
     data = pd.read_excel(filePath, engine=None)
     recordIDs = [recordID for recordID in data['RecordID']]
 
+    Notes = []
     # First, load the Zalo chat page. Wait for the user to login by QR code. If not logged in, move to google.com
     try:
         page.goto("https://chat.zalo.me/")
@@ -88,30 +93,37 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
         # Wait for 200s until logged in and the search contact box is visible
         page.locator(".fa.fa-outline-add-new-contact-2").wait_for(state="visible", timeout=200000)
         print ('Login successfully')
-
-        notes = []
         # Loop through all the record IDs
         for recordID in recordIDs:
-            name, gender, phoneNumber, opDate, removalDate, removalDateStr, Dx = get_info(recordID, data)
+            note = []
+            name, gender, phoneNumber_1, phoneNumber_2, opDate, removalDate, removalDateStr, Dx = get_info(recordID, data)
             # Check whether the phone number is valid
-            phoneNumber= phoneNumber.replace(' ','')
-            validPhoneNumber = True
-            if len(phoneNumber) != 10:
-                validPhoneNumber = False
+            phoneNumber_1, phoneNumber_2 = phoneNumber_1.replace(' ',''), phoneNumber_2.replace(' ','')
+            validPhoneNumber_1 = True
+            if len(phoneNumber_1) != 10:
+                validPhoneNumber_1 = False
 
-            # If the phone number is valid, run the main task
-            if validPhoneNumber:
-                removalDateStrVN = translator(removalDateStr)
-                message = get_message(name, gender, removalDateStrVN, removalDate, Dx)
+            validPhoneNumber_2 = True
+            if len(phoneNumber_2) != 10:
+                validPhoneNumber_2 = False
+
+            print (phoneNumber_1, phoneNumber_2)
+            print (validPhoneNumber_1, validPhoneNumber_2)
+
+            removalDateStrVN = translator(removalDateStr)
+            message = get_message(name, gender, removalDateStrVN, removalDate, Dx)
+
+            # If the first phone number is valid, run the main task
+            if validPhoneNumber_1:
                 print ('about to click Thêm bạn')
                 page.locator(".fa.fa-outline-add-new-contact-2").wait_for(state="visible", timeout=3000)     
                 page.locator(".fa.fa-outline-add-new-contact-2").click()
                 page.get_by_role("textbox", name="Vui lòng điền số điện thoại").click()
-                page.get_by_role("textbox", name="Vui lòng điền số điện thoại").fill(phoneNumber)
+                page.get_by_role("textbox", name="Vui lòng điền số điện thoại").fill(phoneNumber_1)
                 page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").click()
                 
                 try:
-                    errorFlag=False
+                    errorFlag_1=False
                     try:
                         page.get_by_text("Nhắn tin", exact=True).wait_for(state="visible", timeout=3000)
                         page.get_by_text("Nhắn tin", exact=True).click()
@@ -124,31 +136,77 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
                                 page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).nth(1).wait_for(state="visible", timeout=3000)
                                 page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).nth(1).click()
                             except:
-                                print (f'{recordID} không dùng Zalo')
-                                notes.append (f'{recordID} không dùng Zalo')
-                                errorFlag=True
+                                print (f'{phoneNumber_1} không dùng Zalo')
+                                note.append (f'{phoneNumber_1} không dùng Zalo')
+                                errorFlag_1=True
                                 page.get_by_text("Hủy", exact=True).click()
                                 pass
-                    if not errorFlag:
+                    if not errorFlag_1:
                         print (f'Clicked on Chat box of {recordID}')
-                        notes.append ('Đã gửi tin nhắn')
+                        note.append ('Đã gửi tin nhắn')
                         page.locator("#input_line_0").click()
                         page.keyboard.press("Control+A")
                         page.keyboard.press("Backspace")
                         page.locator("#input_line_0").fill(message)
-                        # Pauses for 5 seconds (5000 milliseconds)
+                        # page.get_by_title("Gửi", exact=True).click()
+
                         page.wait_for_timeout(5000)
                 except:
                     pass
+            if not validPhoneNumber_1 and len(phoneNumber_1)>5:
+                print (f'{phoneNumber_1} bị sai số điện thoại')
+                note.append (f'{phoneNumber_1} bị sai số điện thoại')
 
-            if not validPhoneNumber:
-                print (f'{recordID} bị sai số điện thoại')
-                notes.append (f'{recordID} bị sai số điện thoại')
 
-        data['notes'] = notes
+        # If the second phone number is valid, run the main task
+            if validPhoneNumber_2:
+                print ('about to click Thêm bạn')
+                page.locator(".fa.fa-outline-add-new-contact-2").wait_for(state="visible", timeout=3000)     
+                page.locator(".fa.fa-outline-add-new-contact-2").click()
+                page.get_by_role("textbox", name="Vui lòng điền số điện thoại").click()
+                page.get_by_role("textbox", name="Vui lòng điền số điện thoại").fill(phoneNumber_2)
+                page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").click()
+                
+                try:
+                    errorFlag_2=False
+                    try:
+                        page.get_by_text("Nhắn tin", exact=True).wait_for(state="visible", timeout=3000)
+                        page.get_by_text("Nhắn tin", exact=True).click()
+                    except:
+                        try:
+                            page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).first.wait_for(state="visible", timeout=3000)
+                            page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).first.click()
+                        except:
+                            try:
+                                page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).nth(1).wait_for(state="visible", timeout=3000)
+                                page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).nth(1).click()
+                            except:
+                                print (f'{phoneNumber_2} không dùng Zalo')
+                                note.append (f'{phoneNumber_2} không dùng Zalo')
+                                errorFlag_2=True
+                                page.get_by_text("Hủy", exact=True).click()
+                                pass
+                    if not errorFlag_2:
+                        print (f'Clicked on Chat box of {recordID}')
+                        note.append ('Đã gửi tin nhắn')
+                        page.locator("#input_line_0").click()
+                        page.keyboard.press("Control+A")
+                        page.keyboard.press("Backspace")
+                        page.locator("#input_line_0").fill(message)
+                        # page.get_by_title("Gửi", exact=True).click()
+
+                        page.wait_for_timeout(5000)
+                except:
+                    pass
+            if not validPhoneNumber_2 and len(phoneNumber_2)>5:
+                print (f'{phoneNumber_2} bị sai số điện thoại')
+                note.append (f'{phoneNumber_2} bị sai số điện thoại')
+            Notes.append(note)
+
+        data['Notes']=Notes
         data.to_excel(exportPath, index = False)
     except:
-        page.wait_for_timeout(500000)
+        page.wait_for_timeout(6000)
 
 
 with sync_playwright() as playwright:
