@@ -29,6 +29,7 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
             name, gender, phoneNumber_1, phoneNumber_2, dischargeDate, timeToReVisit, Dx = get_info(recordID, data)
             firstReminderDate_object, secondReminderDate_object, thirdReminderDate_object = calculate_dates(dischargeDate, timeToReVisit)
             message = create_message (firstReminderDate_object, secondReminderDate_object, thirdReminderDate_object, name, gender, Dx)
+            ptDict = data[data['RecordID'] == int(recordID)].to_dict()
             note = []
             if message != None:
                 # Check whether the phone number is valid
