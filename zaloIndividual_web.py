@@ -7,7 +7,7 @@ import pandas as pd
 from gen_messages import get_message
 
 
-def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
+def run(playwright: Playwright, filePath: str) -> None:
     browser = playwright.chromium.launch(headless=False)
     context = browser.new_context()
     page = context.new_page()
@@ -155,6 +155,5 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
 
 
 with sync_playwright() as playwright:
-    filePath =  "./JJsonde_reminder.xlsx"
-    exportPath =  "./reminder_messages.xlsx"
-    run(playwright, filePath, exportPath)
+    filePath =  '/Users/binh_d_le/Working/2026_automation/zaloAuto/JJsonde_reminder.xlsx'
+    run(playwright, filePath)
