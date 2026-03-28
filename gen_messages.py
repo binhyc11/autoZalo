@@ -27,7 +27,7 @@ def get_message(name, gender, age, DateStrVN, Date, Dx, whichMessage=None):
                 \nMọi câu hỏi Anh/Chị có thể hỏi tại đây hoặc liên hệ đến Hotline của khoa 02437331502.\
                 \n\nXin cảm ơn!"
     if whichMessage == 'first':
-        note = {'FirstReminderDate': 'Đã gửi'}
+        note = {'FirstReminderDate': ''}
         if Dx == 'JJ':
             message = f"{greeting}\
                         \nXin mời {pronoun} đến phòng 121 nhà B2 vào {DateStrVN}, {Date} để được kiểm tra lại và xem xét rút sonde JJ.\
@@ -42,7 +42,7 @@ def get_message(name, gender, age, DateStrVN, Date, Dx, whichMessage=None):
                         {goodbye}"
             
     if whichMessage == 'second':
-        note = {'SecondReminderDate': 'Đã gửi'}
+        note = {'SecondReminderDate': ''}
         if Dx == 'JJ':
             message = f"Xin chào {pronoun} {name},\
                         \nXin được nhắc {pronoun} có hẹn kiểm tra lại và xem xét rút sonde JJ vào {DateStrVN}, {Date} tại đến phòng 121 nhà B2.\
@@ -60,7 +60,7 @@ def get_message(name, gender, age, DateStrVN, Date, Dx, whichMessage=None):
                         {goodbye}"
 
     if whichMessage == 'third':
-        note = {'ThirdReminderDate': 'Đã gửi'}
+        note = {'ThirdReminderDate': ''}
         if Dx == 'JJ':
             message = f"Xin chào {pronoun} {name},\
                         \nXin được nhắc {pronoun} có hẹn kiểm tra lại và xem xét rút sonde JJ vào ngày mai tại đến phòng 121 nhà B2.\

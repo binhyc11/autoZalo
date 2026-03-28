@@ -88,7 +88,7 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
                                     pass
                         if not errorFlag_1:
                             print (f'Clicked on Chat box of {recordID}')
-                            Notes['Notes'] += f'Đã gửi tin nhắn cho {phoneNumber_1}; '
+                            whichReminderNote[list(whichReminderNote.keys())[0]] += f'Đã gửi tin nhắn cho {phoneNumber_1}; '
                             page.locator("#input_line_0").wait_for(state="visible", timeout=3000)
                             page.locator("#input_line_0").click()
                             page.keyboard.press("Control+A")
@@ -135,7 +135,7 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
 
                         if not errorFlag_2:
                             print (f'Clicked on Chat box of {recordID}')
-                            Notes['Notes'] += f'Đã gửi tin nhắn cho {phoneNumber_2}; '
+                            whichReminderNote[list(whichReminderNote.keys())[0]] += f'Đã gửi tin nhắn cho {phoneNumber_2}; '
                             page.locator("#input_line_0").wait_for(state="visible", timeout=3000)
                             page.locator("#input_line_0").click()
                             page.keyboard.press("Control+A")
@@ -143,7 +143,7 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
                             page.locator("#input_line_0").fill(message)
                             # page.get_by_title("Gửi", exact=True).click()
 
-                            page.wait_for_timeout(60000)
+                            page.wait_for_timeout(5000)
                     except:
                         pass
 
@@ -151,7 +151,7 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
                 data = add_notes(data, recordID, whichReminderNote)
         data.to_excel(filePath, index = False)
     except:
-        page.wait_for_timeout(6000)
+        page.wait_for_timeout(60000)
 
 
 with sync_playwright() as playwright:
