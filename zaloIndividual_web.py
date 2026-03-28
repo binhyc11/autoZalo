@@ -26,7 +26,7 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
         # Loop through all the record IDs
         for recordID in recordIDs:
             whichDate, Date, DateStrVN = check_date(recordID, data)
-            name, gender, phoneNumber_1, phoneNumber_2, Dx = get_info(recordID, data)
+            name, gender, age, phoneNumber_1, phoneNumber_2, Dx = get_info(recordID, data)
 
             if whichDate != None:
                 Notes = {'Notes':''}
@@ -35,18 +35,24 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
                 phoneNumber_1, phoneNumber_2 = phoneNumber_1.replace(' ',''), phoneNumber_2.replace(' ','')
                 
                 validPhoneNumber_1 = True
-                if len(phoneNumber_1) != 10 and phoneNumber_1!='0':
+                if len(phoneNumber_1) != 10:
                     validPhoneNumber_1 = False
-                    print (f'{phoneNumber_1} bị sai số điện thoại')
-                    Notes['Notes'] += f'{phoneNumber_1} bị sai số điện thoại; '
-
+                    if phoneNumber_1!='0':
+                        print (f'Số điện thoại {phoneNumber_1} bị sai')
+                        Notes['Notes'] += f'Số điện thoại {phoneNumber_1} bị sai; '
+                    else:
+                        Notes['Notes'] += ''
+                        
                 validPhoneNumber_2 = True
-                if len(phoneNumber_2) != 10 and phoneNumber_2!='0':
+                if len(phoneNumber_2) != 10:
                     validPhoneNumber_2 = False
-                    print (f'{phoneNumber_2} bị sai số điện thoại')
-                    Notes['Notes'] += f'{phoneNumber_2} bị sai số điện thoại; '
+                    if phoneNumber_2!='0':
+                        print (f'Số điện thoại {phoneNumber_2} bị sai')
+                        Notes['Notes'] += f'Số điện thoại {phoneNumber_2} bị sai; '
+                    else:
+                        Notes['Notes'] += ''
 
-                whichReminderNote, message = get_message(name, gender, DateStrVN, Date, Dx, whichMessage=whichDate)
+                whichReminderNote, message = get_message(name, gender, age, DateStrVN, Date, Dx, whichMessage=whichDate)
 
                 # If the first phone number is valid, run the main task
                 if validPhoneNumber_1:
@@ -82,7 +88,7 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
                                     pass
                         if not errorFlag_1:
                             print (f'Clicked on Chat box of {recordID}')
-                            Notes['Notes'] += 'Đã gửi tin nhắn; '
+                            Notes['Notes'] += f'Đã gửi tin nhắn cho {phoneNumber_1}; '
                             page.locator("#input_line_0").wait_for(state="visible", timeout=3000)
                             page.locator("#input_line_0").click()
                             page.keyboard.press("Control+A")
@@ -129,7 +135,7 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
 
                         if not errorFlag_2:
                             print (f'Clicked on Chat box of {recordID}')
-                            Notes['Notes'] += 'Đã gửi tin nhắn; '
+                            Notes['Notes'] += f'Đã gửi tin nhắn cho {phoneNumber_2}; '
                             page.locator("#input_line_0").wait_for(state="visible", timeout=3000)
                             page.locator("#input_line_0").click()
                             page.keyboard.press("Control+A")
@@ -137,13 +143,13 @@ def run(playwright: Playwright, filePath: str, exportPath: str) -> None:
                             page.locator("#input_line_0").fill(message)
                             # page.get_by_title("Gửi", exact=True).click()
 
-                            page.wait_for_timeout(5000)
+                            page.wait_for_timeout(60000)
                     except:
                         pass
 
                 data = add_notes(data, recordID, Notes)
                 data = add_notes(data, recordID, whichReminderNote)
-        data.to_excel(exportPath, index = False)
+        data.to_excel(filePath, index = False)
     except:
         page.wait_for_timeout(6000)
 

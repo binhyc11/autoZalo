@@ -30,10 +30,6 @@ def get_info(recordID: str, data):
     name = data['Name'][data['RecordID']==recordID].to_list()[0]
     age = data['Age'][data['RecordID']==recordID].to_list()[0]
     gender = data['Gender'][data['RecordID']==recordID].to_list()[0]
-    if gender == 'Male':
-        genderVN = 'anh'
-    if gender == 'Female':
-        genderVN = 'chị'
         
     phoneNumber_1 = str(data['PhoneNumber_1'][data['RecordID']==recordID].to_list()[0])
     phoneNumber_2 = str(data['PhoneNumber_2'][data['RecordID']==recordID].to_list()[0])
@@ -45,7 +41,7 @@ def get_info(recordID: str, data):
 
     Dx = data['Dx'][data['RecordID']==recordID].to_list()[0]
 
-    return name, genderVN, phoneNumber_1, phoneNumber_2, Dx
+    return name, gender, age, phoneNumber_1, phoneNumber_2, Dx
 
 def convert_dates (dateObjects):
     """
