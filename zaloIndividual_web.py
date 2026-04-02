@@ -1,7 +1,7 @@
 import re
 from playwright.sync_api import Playwright, sync_playwright, expect
 
-from datetime import datetime, timedelta
+from datetime import date
 from utils import get_info, add_notes, check_date
 import pandas as pd
 from gen_messages import get_message
@@ -25,12 +25,13 @@ def run(playwright: Playwright, filePath: str) -> None:
         print ('Login successfully')
         # Loop through all the record IDs
         for recordID in recordIDs:
+            print (recordID)
             whichDate, Date, DateStrVN = check_date(recordID, data)
+            print (whichDate)
             name, gender, age, phoneNumber_1, phoneNumber_2, Dx = get_info(recordID, data)
 
             if whichDate != None:
                 Notes = {'Notes':''}
-
                 # Check whether the phone number is valid
                 phoneNumber_1, phoneNumber_2 = phoneNumber_1.replace(' ',''), phoneNumber_2.replace(' ','')
                 
@@ -62,8 +63,12 @@ def run(playwright: Playwright, filePath: str) -> None:
                     page.get_by_role("textbox", name="Vui lòng điền số điện thoại").wait_for(state="visible", timeout=3000)                      
                     page.get_by_role("textbox", name="Vui lòng điền số điện thoại").click()
                     page.get_by_role("textbox", name="Vui lòng điền số điện thoại").fill(phoneNumber_1)
-                    page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").wait_for(state="visible", timeout=3000)
-                    page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").click()
+                    try:
+                        page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").wait_for(state="visible", timeout=3000)
+                        page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").click()
+                    except:
+                        page.locator("div").filter(has_text=re.compile(r"^Tìm kiếm$")).nth(2).wait_for(state="visible", timeout=3000)
+                        page.locator("div").filter(has_text=re.compile(r"^Tìm kiếm$")).nth(2).click()
                     
                     try:
                         errorFlag_1=False
@@ -71,10 +76,12 @@ def run(playwright: Playwright, filePath: str) -> None:
                             page.get_by_text("Nhắn tin", exact=True).wait_for(state="visible", timeout=3000)
                             page.get_by_text("Nhắn tin", exact=True).click()
                         except:
+                            print ('Không thấy page.get_by_text("Nhắn tin", exact=True)')
                             try:
                                 page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).first.wait_for(state="visible", timeout=3000)
                                 page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).first.click()
                             except:
+                                print ('Không thấy page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$"))')
                                 try:
                                     page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).nth(1).wait_for(state="visible", timeout=3000)
                                     page.locator("div").filter(has_text=re.compile(r"^Nhắn tin$")).nth(1).click()
@@ -108,9 +115,12 @@ def run(playwright: Playwright, filePath: str) -> None:
                     page.get_by_role("textbox", name="Vui lòng điền số điện thoại").wait_for(state="visible", timeout=3000)  
                     page.get_by_role("textbox", name="Vui lòng điền số điện thoại").click()
                     page.get_by_role("textbox", name="Vui lòng điền số điện thoại").fill(phoneNumber_2)
-                    page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").wait_for(state="visible", timeout=3000)  
-                    page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").click()
-                    
+                    try:
+                        page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").wait_for(state="visible", timeout=3000)  
+                        page.locator("#zl-modal__dialog-body").get_by_text("Tìm kiếm").click()
+                    except:
+                        page.locator("div").filter(has_text=re.compile(r"^Tìm kiếm$")).nth(2).wait_for(state="visible", timeout=3000)
+                        page.locator("div").filter(has_text=re.compile(r"^Tìm kiếm$")).nth(2).click()
                     try:
                         errorFlag_2=False
                         try:
@@ -149,11 +159,13 @@ def run(playwright: Playwright, filePath: str) -> None:
 
                 data = add_notes(data, recordID, Notes)
                 data = add_notes(data, recordID, whichReminderNote)
-        data.to_excel(filePath, index = False)
+        print ('Exporting the file')
+        data.to_excel(filePath.replace('JJsonde_reminder', f'reminder_messages_{date.today()}'),index = False)
+        page.wait_for_timeout(300000)
     except:
         page.wait_for_timeout(60000)
 
 
 with sync_playwright() as playwright:
-    filePath =  '/Users/binh_d_le/Working/2026_automation/zaloAuto/JJsonde_reminder.xlsx'
+    filePath =  f'/Users/binh_d_le/Working/2026_automation/zaloAuto/JJsonde_reminder.xlsx'
     run(playwright, filePath)
