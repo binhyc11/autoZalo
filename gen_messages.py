@@ -4,25 +4,25 @@ def get_VNpronouns (gender, age):
     """
     if int(age)<45:
         me = 'tôi'
-        if gender == 'Male':
+        if gender == 'Nam':
             pronoun = 'Anh'
-        else:
+        elif gender == 'Nữ':
             pronoun = 'Chị'
     elif int(age) < 75:
         me = 'cháu'
-        if gender == 'Male':
+        if gender == 'Nam':
             pronoun = 'Chú'
-        else:
+        elif gender == 'Nữ':
             pronoun = 'Cô'
     else:
         me = 'cháu'
-        if gender == 'Male':
+        if gender == 'Nam':
             pronoun = 'Ông'
-        else:
+        elif gender == 'Nữ':
             pronoun = 'Bà'
     return me, pronoun
 
-def get_message(name, gender, age, DateStrVN, Date, Dx, whichMessage=None):
+def get_message(name, gender, age, DateStrVN, Date, JJ, siteToReVisit, whichMessage=None):
     me, pronoun = get_VNpronouns (gender, age)
 
     greeting = f"Xin chào {pronoun} {name}, {me} là Bác sĩ Lê Duy Bình - Khoa Ngoại tiết niệu, Bệnh viện Đa khoa Xanh Pôn."
@@ -31,38 +31,38 @@ def get_message(name, gender, age, DateStrVN, Date, Dx, whichMessage=None):
                 \n\nXin cảm ơn!"
     if whichMessage == 'first':
         note = {'FirstReminderDate': ''}
-        if Dx == 'JJ':
+        if JJ == 'Yes':
             message = f"{greeting}\
-                        \n\nMời {pronoun} đến phòng 121 nhà B2 vào {DateStrVN}, {Date} để được kiểm tra lại và xem xét rút sonde JJ.\
+                        \n\nMời {pronoun} đến {siteToReVisit} vào {DateStrVN}, {Date} để được kiểm tra lại và xem xét rút sonde JJ.\
                         {goodbye}"
         else:
             message = f"{greeting}\
-                        \n\nMời {pronoun} đến phòng khám số 10, Trung tâm Kĩ thuật cao và Tiêu hóa vào {DateStrVN}, {Date} để được đánh giá sau quá trình điều trị.\
+                        \n\nMời {pronoun} đến {siteToReVisit} vào {DateStrVN}, {Date} để được đánh giá sau quá trình điều trị.\
                         {goodbye}"
             
     if whichMessage == 'second':
         note = {'SecondReminderDate': ''}
-        if Dx == 'JJ':
+        if JJ == 'Yes':
             message = f"Xin chào {pronoun} {name},\
-                        \nXin được nhắc {pronoun} có hẹn kiểm tra lại và xem xét rút sonde JJ vào {DateStrVN}, {Date} tại đến phòng 121 nhà B2.\
+                        \nXin được nhắc {pronoun} có hẹn kiểm tra lại và xem xét rút sonde JJ vào {DateStrVN}, {Date} tại {siteToReVisit}.\
                         \nNếu {pronoun} đã đến, xin bỏ qua tin nhắn này.\
                         {goodbye}"        
         else:
             message = f"Xin chào {pronoun} {name},\
-                        \nXin được nhắc {pronoun} có hẹn đánh giá sau quá trình điều trị vào {DateStrVN}, {Date} tại phòng khám số 10, Trung tâm Kĩ thuật cao và Tiêu hóa.\
+                        \nXin được nhắc {pronoun} có hẹn đánh giá sau quá trình điều trị vào {DateStrVN}, {Date} tại {siteToReVisit}.\
                         \nNếu {pronoun} đã đến, xin bỏ qua tin nhắn này.\
                         {goodbye}"
 
     if whichMessage == 'third':
         note = {'ThirdReminderDate': ''}
-        if Dx == 'JJ':
+        if JJ == 'Yes':
             message = f"Xin chào {pronoun} {name},\
-                        \nXin được nhắc {pronoun} có hẹn kiểm tra lại và xem xét rút sonde JJ vào ngày mai tại đến phòng 121 nhà B2.\
+                        \nXin được nhắc {pronoun} có hẹn kiểm tra lại và xem xét rút sonde JJ vào ngày mai tại {siteToReVisit}.\
                         \nNếu {pronoun} đã đến, xin bỏ qua tin nhắn này.\
                         {goodbye}"        
         else:
             message = f"Xin chào {pronoun} {name},\
-                        \nXin được nhắc {pronoun} có hẹn đánh giá sau quá trình điều trị vào ngày mai tại phòng khám số 10, Trung tâm Kĩ thuật cao và Tiêu hóa.\
+                        \nXin được nhắc {pronoun} có hẹn đánh giá sau quá trình điều trị vào ngày mai tại {siteToReVisit}.\
                         \nNếu {pronoun} đã đến, xin bỏ qua tin nhắn này.\
                         {goodbye}"
     return note, message

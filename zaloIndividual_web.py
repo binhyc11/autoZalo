@@ -1,4 +1,4 @@
-import re
+import re, os
 from playwright.sync_api import Playwright, sync_playwright, expect
 
 from datetime import date
@@ -28,9 +28,8 @@ def run(playwright: Playwright, filePath: str) -> None:
             print (recordID)
             whichDate, Date, DateStrVN = check_date(recordID, data)
             print (whichDate)
-            name, gender, age, phoneNumber_1, phoneNumber_2, Dx = get_info(recordID, data)
-
             if whichDate != None:
+                name, gender, age, phoneNumber_1, phoneNumber_2, JJ, siteToReVisit = get_info(recordID, data)
                 Notes = {'Notes':''}
                 # Check whether the phone number is valid
                 phoneNumber_1, phoneNumber_2 = phoneNumber_1.replace(' ',''), phoneNumber_2.replace(' ','')
@@ -53,7 +52,7 @@ def run(playwright: Playwright, filePath: str) -> None:
                     else:
                         Notes['Notes'] += ''
 
-                whichReminderNote, message = get_message(name, gender, age, DateStrVN, Date, Dx, whichMessage=whichDate)
+                whichReminderNote, message = get_message(name, gender, age, DateStrVN, Date, JJ, siteToReVisit, whichMessage=whichDate)
 
                 # If the first phone number is valid, run the main task
                 if validPhoneNumber_1:
@@ -101,7 +100,7 @@ def run(playwright: Playwright, filePath: str) -> None:
                             page.keyboard.press("Control+A")
                             page.keyboard.press("Backspace")
                             page.locator("#input_line_0").fill(message)
-                            # page.get_by_title("Gửi", exact=True).click()
+                            page.get_by_title("Gửi", exact=True).click()
 
                             page.wait_for_timeout(5000)
                     except:
@@ -140,7 +139,7 @@ def run(playwright: Playwright, filePath: str) -> None:
                                     errorFlag_2=True
                                     page.get_by_text("Hủy", exact=True).wait_for(state="visible", timeout=3000)  
                                     page.get_by_text("Hủy", exact=True).click()
-                                    whichReminderNote = {}
+                                    # whichReminderNote = {}
                                     pass
 
                         if not errorFlag_2:
@@ -151,8 +150,7 @@ def run(playwright: Playwright, filePath: str) -> None:
                             page.keyboard.press("Control+A")
                             page.keyboard.press("Backspace")
                             page.locator("#input_line_0").fill(message)
-                            # page.get_by_title("Gửi", exact=True).click()
-
+                            page.get_by_title("Gửi", exact=True).click()
                             page.wait_for_timeout(5000)
                     except:
                         pass
@@ -160,12 +158,15 @@ def run(playwright: Playwright, filePath: str) -> None:
                 data = add_notes(data, recordID, Notes)
                 data = add_notes(data, recordID, whichReminderNote)
         print ('Exporting the file')
-        data.to_excel(filePath.replace('JJsonde_reminder', f'reminder_messages_{date.today()}'),index = False)
+        data.to_excel(filePath.replace('Discharge', f'Reminder_messages'),index = False)
         page.wait_for_timeout(300000)
     except:
         page.wait_for_timeout(60000)
 
 
 with sync_playwright() as playwright:
-    filePath =  f'/Users/binh_d_le/Working/2026_automation/zaloAuto/JJsonde_reminder.xlsx'
-    run(playwright, filePath)
+    root = f'/Users/binh_d_le/Working/2026_automation/zaloAuto/actual_run/'
+    for filename in os.listdir (root):
+        if 'Discharge' in filename: 
+            filePath =  f'/Users/binh_d_le/Working/2026_automation/zaloAuto/actual_run/{filename}'
+            run(playwright, filePath)

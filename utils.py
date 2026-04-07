@@ -7,20 +7,20 @@ def check_date(recordID, data):
     """
     dischargeDate = data['DischargeDate'][data['RecordID']==recordID].to_list()[0]
     timeToReVisit = data['TimeToReVisit'][data['RecordID']==recordID].to_list()[0]
-
-    firstReminderDate_object, secondReminderDate_object, thirdReminderDate_object = calculate_dates(dischargeDate, timeToReVisit)
-
-    if is_today(firstReminderDate_object):
-        Date, DateStrVN = convert_dates(firstReminderDate_object)
-        whichDate = 'first'
-    elif is_today(secondReminderDate_object):
-        Date, DateStrVN = convert_dates(secondReminderDate_object)
-        whichDate = 'second'
-    elif is_today(thirdReminderDate_object):
-        Date, DateStrVN = convert_dates(thirdReminderDate_object)
-        whichDate = 'third'
-    else:
+    if timeToReVisit == '0':
         whichDate, Date, DateStrVN = None, None, None
+    else:
+        firstReminderDate_object, secondReminderDate_object, thirdReminderDate_object, reVisitDate_object = calculate_dates(dischargeDate, timeToReVisit)
+        Date, DateStrVN = convert_dates(reVisitDate_object)
+
+        if is_today(firstReminderDate_object):
+            whichDate = 'first'
+        # elif is_today(secondReminderDate_object):
+        #     whichDate = 'second'
+        elif is_today(thirdReminderDate_object):
+            whichDate = 'third'
+        else:
+            whichDate, Date, DateStrVN = None, None, None
     return whichDate, Date, DateStrVN
 
 def get_info(recordID: str, data):
@@ -30,18 +30,25 @@ def get_info(recordID: str, data):
     name = data['Name'][data['RecordID']==recordID].to_list()[0]
     age = data['Age'][data['RecordID']==recordID].to_list()[0]
     gender = data['Gender'][data['RecordID']==recordID].to_list()[0]
-        
+    site = data['SiteToReVisit'][data['RecordID']==recordID].to_list()[0]
     phoneNumber_1 = str(data['PhoneNumber_1'][data['RecordID']==recordID].to_list()[0])
     phoneNumber_2 = str(data['PhoneNumber_2'][data['RecordID']==recordID].to_list()[0])
+
+    if site == '10':
+        siteToReVisit = 'phòng khám số 10, Trung tâm Kĩ thuật cao và Tiêu hóa'
+    elif site == '121':
+        siteToReVisit = 'phòng 121 nhà B2'
+    else:
+        siteToReVisit = 'Không cần khám lại'
 
     if str(phoneNumber_1)[0] != '0':
         phoneNumber_1 = '0'+ str(phoneNumber_1)
     if str(phoneNumber_2)[0] != '0':
         phoneNumber_2 = '0'+ str(phoneNumber_2)
 
-    Dx = data['Dx'][data['RecordID']==recordID].to_list()[0]
+    JJ = data['JJ'][data['RecordID']==recordID].to_list()[0]
 
-    return name, gender, age, phoneNumber_1, phoneNumber_2, Dx
+    return name, gender, age, phoneNumber_1, phoneNumber_2, JJ, siteToReVisit
 
 def convert_dates (dateObjects):
     """
@@ -60,6 +67,7 @@ def calculate_dates(dischargeDate: str, TimeToReVisit:str):
     """
     Calculate reminder dates: 1 day after discharge day, 3 days and 1 day prior to the revisit day.
     """
+    
     dischargeDate_object = datetime.strptime(dischargeDate, '%d/%m/%Y')
     
     firstReminderDate_object = dischargeDate_object + timedelta(days=1)
@@ -67,7 +75,7 @@ def calculate_dates(dischargeDate: str, TimeToReVisit:str):
     secondReminderDate_object = reVisitDate_object + timedelta(days=-3)
     thirdReminderDate_object = reVisitDate_object + timedelta(days=-1)
 
-    return firstReminderDate_object, secondReminderDate_object, thirdReminderDate_object
+    return firstReminderDate_object, secondReminderDate_object, thirdReminderDate_object, reVisitDate_object
 
 def is_today(dateTimeObject):
     """
