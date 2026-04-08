@@ -108,7 +108,7 @@ def run(playwright: Playwright, root: str) -> None:
                                     page.locator("#input_line_0").fill(message)
                                     ### Click on Send button
                                     page.wait_for_timeout(5000)
-                                    # page.get_by_title("Gửi", exact=True).click()
+                                    page.get_by_title("Gửi", exact=True).click()
 
                             except:
                                 pass
@@ -160,7 +160,7 @@ def run(playwright: Playwright, root: str) -> None:
 
                                     ### Click on Send button
                                     page.wait_for_timeout(5000)
-                                    # page.get_by_title("Gửi", exact=True).click()
+                                    page.get_by_title("Gửi", exact=True).click()
                             except:
                                 pass
 
