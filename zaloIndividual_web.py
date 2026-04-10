@@ -21,7 +21,7 @@ def run(playwright: Playwright, root: str) -> None:
         print ('Login successfully')
         
         for filename in os.listdir (root):
-            if 'Reminder_messages' in filename: 
+            if ('Reminder_messages' in filename) and ('~$' not in filename): 
                 print (filename)
                 filePath =  f'/Users/binh_d_le/Working/2026_automation/zaloAuto/actual_run/{filename}'
                 
@@ -33,7 +33,7 @@ def run(playwright: Playwright, root: str) -> None:
                 for recordID in recordIDs:
                     print (recordID)
                     whichDate, Date, DateStrVN = check_date(recordID, data)
-                    # print (whichDate)
+                    print (whichDate)
                     if whichDate != None:
                         name, gender, age, phoneNumber_1, phoneNumber_2, JJ, siteToReVisit = get_info(recordID, data)
                         Notes = {'Notes':''}
@@ -108,7 +108,7 @@ def run(playwright: Playwright, root: str) -> None:
                                     page.locator("#input_line_0").fill(message)
                                     ### Click on Send button
                                     page.wait_for_timeout(5000)
-                                    page.get_by_title("Gửi", exact=True).click()
+                                    # page.get_by_title("Gửi", exact=True).click()
 
                             except:
                                 pass
@@ -160,7 +160,7 @@ def run(playwright: Playwright, root: str) -> None:
 
                                     ### Click on Send button
                                     page.wait_for_timeout(5000)
-                                    page.get_by_title("Gửi", exact=True).click()
+                                    # page.get_by_title("Gửi", exact=True).click()
                             except:
                                 pass
 

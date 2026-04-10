@@ -4,19 +4,19 @@ def get_VNpronouns (gender, age):
     """
     if int(age)<45:
         me = 'tôi'
-        if gender == ('Nam' or 'NAM'):
+        if gender in ('Nam', 'NAM'):
             pronoun = 'Anh'
         else:
             pronoun = 'Chị'
     elif int(age) < 75:
         me = 'cháu'
-        if gender == ('Nam' or 'NAM'):
+        if gender in ('Nam', 'NAM'):
             pronoun = 'Chú'
         else:
             pronoun = 'Cô'
     else:
         me = 'cháu'
-        if gender == ('Nam' or 'NAM'):
+        if gender in ('Nam', 'NAM'):
             pronoun = 'Ông'
         else:
             pronoun = 'Bà'
