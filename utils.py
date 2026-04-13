@@ -13,11 +13,11 @@ def check_date(recordID, data):
         firstReminderDate_object, secondReminderDate_object, thirdReminderDate_object, reVisitDate_object = calculate_dates(dischargeDate, timeToReVisit)
         Date, DateStrVN = convert_dates(reVisitDate_object)
 
-        if is_today(firstReminderDate_object):
+        if is_today(convert_reminder_dates(firstReminderDate_object)):
             whichDate = 'first'
-        # elif is_today(secondReminderDate_object):
+        # elif is_today(convert_reminder_dates(secondReminderDate_object)):
         #     whichDate = 'second'
-        elif is_today(thirdReminderDate_object):
+        elif is_today(convert_reminder_dates(thirdReminderDate_object)):
             whichDate = 'third'
         else:
             whichDate, Date, DateStrVN = None, None, None
@@ -61,6 +61,17 @@ def convert_dates (dateObjects):
     else:
         convertedDate_object = dateObjects
     return convertedDate_object.strftime("%d/%m/%Y"), translator(convertedDate_object.strftime("%A"))
+
+def convert_reminder_dates (dateObjects):
+    """
+    Convert reminder dates if they are on the weekend.
+    """
+
+    if dateObjects.strftime("%A") == 'Saturday':
+        convertedDate_object = dateObjects + timedelta(days=2)
+    elif dateObjects.strftime("%A") == 'Sunday':
+        convertedDate_object = dateObjects + timedelta(days=1)
+    return convertedDate_object
 
 
 def calculate_dates(dischargeDate: str, TimeToReVisit:str):

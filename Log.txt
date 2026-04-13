@@ -2,7 +2,9 @@
 	+ Bị giới hạn số lượng tìm kiếm với tài khoản Zalo cá nhân miễn phí
 	+ Chưa check được sđt nào không cho phép gửi tin nhắn tới người lạ
 	+ Chưa có khả năng trả lời lại phản hồi --> Vẫn cần có người làm CSKH
+	+ Cần phải chạy hàng ngày, phải đăng nhập mỗi lần chạy --> Chỉnh sửa code để người làm hành chính chỉ cần chạy từ T2-T6.
 
 - Advantages:
 	+ Miễn phí
 	+ Chạy trên mọi máy, dù cấu hình yếu
+	
