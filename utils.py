@@ -71,6 +71,8 @@ def convert_reminder_dates (dateObjects):
         convertedDate_object = dateObjects + timedelta(days=2)
     elif dateObjects.strftime("%A") == 'Sunday':
         convertedDate_object = dateObjects + timedelta(days=1)
+    else:
+        convertedDate_object = dateObjects
     return convertedDate_object
 
 
