@@ -31,7 +31,7 @@ def get_message(name, gender, age, DateStrVN, Date, JJ, siteToReVisit, whichMess
                 \n\nXin cảm ơn!"
     if whichMessage == 'first':
         note = {'FirstReminderDate': ''}
-        if JJ == 'Yes':
+        if JJ in ('Yes', '1'):
             message = f"{greeting}\
                         \n\nMời {pronoun} đến {siteToReVisit} vào {DateStrVN}, {Date} để được kiểm tra lại và xem xét rút sonde JJ.\
                         {goodbye}"
@@ -42,7 +42,7 @@ def get_message(name, gender, age, DateStrVN, Date, JJ, siteToReVisit, whichMess
             
     if whichMessage == 'second':
         note = {'SecondReminderDate': ''}
-        if JJ == 'Yes':
+        if JJ in ('Yes', '1'):
             message = f"Xin chào {pronoun} {name},\
                         \nXin được nhắc {pronoun} có hẹn kiểm tra lại và xem xét rút sonde JJ vào {DateStrVN}, {Date} tại {siteToReVisit}.\
                         \nNếu {pronoun} đã đến, xin bỏ qua tin nhắn này.\
@@ -55,7 +55,7 @@ def get_message(name, gender, age, DateStrVN, Date, JJ, siteToReVisit, whichMess
 
     if whichMessage == 'third':
         note = {'ThirdReminderDate': ''}
-        if JJ == 'Yes':
+        if JJ in ('Yes', '1'):
             message = f"Xin chào {pronoun} {name},\
                         \nXin được nhắc {pronoun} có hẹn kiểm tra lại và xem xét rút sonde JJ vào ngày mai tại {siteToReVisit}.\
                         \nNếu {pronoun} đã đến, xin bỏ qua tin nhắn này.\
