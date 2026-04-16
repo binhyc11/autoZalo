@@ -5,8 +5,8 @@ def check_date(recordID, data):
     """
     Check whether today is the day for reminder. If yes, create a date and weekday as string.
     """
-    dischargeDate = data['DischargeDate'][data['RecordID']==recordID].to_list()[0]
-    timeToReVisit = data['TimeToReVisit'][data['RecordID']==recordID].to_list()[0]
+    dischargeDate = data['DischargeDate'][data['RecordID']==recordID].to_list()[0].strip()
+    timeToReVisit = data['TimeToReVisit'][data['RecordID']==recordID].to_list()[0].strip()
     if timeToReVisit == '0':
         whichDate, Date, DateStrVN = None, None, None
     else:
@@ -27,12 +27,12 @@ def get_info(recordID: str, data):
     """
     Get name, operation date, JJ sonde removal date
     """
-    name = data['Name'][data['RecordID']==recordID].to_list()[0]
-    age = data['Age'][data['RecordID']==recordID].to_list()[0]
-    gender = data['Gender'][data['RecordID']==recordID].to_list()[0]
-    site = data['SiteToReVisit'][data['RecordID']==recordID].to_list()[0]
-    phoneNumber_1 = str(data['PhoneNumber_1'][data['RecordID']==recordID].to_list()[0])
-    phoneNumber_2 = str(data['PhoneNumber_2'][data['RecordID']==recordID].to_list()[0])
+    name = data['Name'][data['RecordID']==recordID].to_list()[0].strip()
+    age = data['Age'][data['RecordID']==recordID].to_list()[0].strip()
+    gender = data['Gender'][data['RecordID']==recordID].to_list()[0].strip()
+    site = data['SiteToReVisit'][data['RecordID']==recordID].to_list()[0].strip()
+    phoneNumber_1 = str(data['PhoneNumber_1'][data['RecordID']==recordID].to_list()[0]).strip()
+    phoneNumber_2 = str(data['PhoneNumber_2'][data['RecordID']==recordID].to_list()[0]).strip()
 
     if site == '10':
         siteToReVisit = 'phòng khám số 10, Trung tâm Kĩ thuật cao và Tiêu hóa'
