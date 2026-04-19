@@ -65,4 +65,17 @@ def get_message(name, gender, age, DateStrVN, Date, JJ, siteToReVisit, whichMess
                         \nXin được nhắc {pronoun} có hẹn đánh giá sau quá trình điều trị vào ngày mai tại {siteToReVisit}.\
                         \nNếu {pronoun} đã đến, xin bỏ qua tin nhắn này.\
                         {goodbye}"
+    
+    if whichMessage == 'third_Friday':
+        note = {'ThirdReminderDate': ''}
+        if JJ in ('Yes', '1'):
+            message = f"Xin chào {pronoun} {name},\
+                        \nXin được nhắc {pronoun} có hẹn kiểm tra lại và xem xét rút sonde JJ vào {DateStrVN}, {Date} tại {siteToReVisit}.\
+                        \nNếu {pronoun} đã đến, xin bỏ qua tin nhắn này.\
+                        {goodbye}"        
+        else:
+            message = f"Xin chào {pronoun} {name},\
+                        \nXin được nhắc {pronoun} có hẹn đánh giá sau quá trình điều trị vào {DateStrVN}, {Date} tại {siteToReVisit}.\
+                        \nNếu {pronoun} đã đến, xin bỏ qua tin nhắn này.\
+                        {goodbye}"
     return note, message

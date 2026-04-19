@@ -11,14 +11,19 @@ def check_date(recordID, data):
         whichDate, Date, DateStrVN = None, None, None
     else:
         firstReminderDate_object, secondReminderDate_object, thirdReminderDate_object, reVisitDate_object = calculate_dates(dischargeDate, timeToReVisit)
+
         Date, DateStrVN = convert_dates(reVisitDate_object)
 
-        if is_today(convert_reminder_dates(firstReminderDate_object)):
+        if is_today(convert_first_reminder_dates(firstReminderDate_object)):
             whichDate = 'first'
-        # elif is_today(convert_reminder_dates(secondReminderDate_object)):
+        # elif is_today(convert_first_reminder_dates(secondReminderDate_object)):
         #     whichDate = 'second'
-        elif is_today(convert_reminder_dates(thirdReminderDate_object)):
-            whichDate = 'third'
+        # If the third reminder is on Sunday (it means the revisit date is on Monday) --> Then move the third reminder to Friday
+        elif is_today(convert_third_reminder_dates(thirdReminderDate_object)):
+            if convert_third_reminder_dates(thirdReminderDate_object).strftime("%A") == 'Friday':
+                whichDate = 'third_Friday'
+            else:
+                whichDate = 'third'
         else:
             whichDate, Date, DateStrVN = None, None, None
     return whichDate, Date, DateStrVN
@@ -62,7 +67,7 @@ def convert_dates (dateObjects):
         convertedDate_object = dateObjects
     return convertedDate_object.strftime("%d/%m/%Y"), translator(convertedDate_object.strftime("%A"))
 
-def convert_reminder_dates (dateObjects):
+def convert_first_reminder_dates (dateObjects):
     """
     Convert reminder dates if they are on the weekend.
     """
@@ -75,6 +80,16 @@ def convert_reminder_dates (dateObjects):
         convertedDate_object = dateObjects
     return convertedDate_object
 
+def convert_third_reminder_dates (dateObjects):
+    """
+    Convert the third reminder date if it is on Sunday.
+    """
+
+    if dateObjects.strftime("%A") == 'Sunday':
+        convertedDate_object = dateObjects + timedelta(days=-2)
+    else:
+        convertedDate_object = dateObjects
+    return convertedDate_object
 
 def calculate_dates(dischargeDate: str, TimeToReVisit:str):
     """
